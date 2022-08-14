@@ -1,0 +1,140 @@
+
+package guardar;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
+
+public class login extends JFrame {
+
+    JPanel p1 = new JPanel();
+    JTextField t1 = new JTextField();
+    JPasswordField t2 = new JPasswordField();
+    Object usuarios[][] = new Object[50][9];
+    int oportunidades = 3;
+
+    //metodos
+    private void inicio() throws ClassNotFoundException {
+        load();
+
+        setTitle("Login");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setBounds(50, 175, 400, 400);
+        setVisible(true);
+        t1.setBackground(Color.red);
+        t1.setFont(new Font("Arial", Font.BOLD, 14));
+        t2.setBackground(Color.red);
+        t2.setFont(new Font("Arial", Font.BOLD, 14));
+        p1.setBackground(Color.white);
+        p1.setLayout(null);
+        add(p1);
+
+        JLabel l1 = new JLabel("Nombre:");
+        l1.setBounds(70, 75, 80, 40);
+        l1.setFont(new Font("Arial", Font.BOLD, 14));
+        p1.add(l1);
+
+        t1.setBounds(150, 79, 100, 30);
+        p1.add(t1);
+
+        JLabel l2 = new JLabel("Contraseña:");
+        l2.setBounds(50, 175, 90, 40);
+        l2.setFont(new Font("Arial", Font.BOLD, 14));
+        p1.add(l2);
+
+        t2.setBounds(150, 179, 100, 30);
+        p1.add(t2);
+
+        JButton b1 = new JButton("Ingresar");
+        b1.setBounds(140, 250, 100, 50);
+        p1.add(b1);
+
+        ActionListener verificar = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                try {
+                    user();
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(login.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        };
+
+        b1.addActionListener(verificar);
+
+    }
+
+    public void load() throws ClassNotFoundException {
+
+        try {
+
+            ObjectInputStream recuperar = new ObjectInputStream(new FileInputStream("usuarios.dat"));
+
+            usuarios = (Object[][]) recuperar.readObject();
+            recuperar.close();
+
+        } catch (IOException e) {
+        }
+
+    }
+
+    private void user() throws ClassNotFoundException {
+        load();
+        administrador ad = new administrador();
+        if (t1.getText().equals("Admin") && t2.getText().equals("Admin")) {
+            ad.ejecutar("Administrador");
+            setVisible(false);
+
+        } else {
+            boolean var = false;
+            for (int i = 0; i < usuarios.length; i++) {
+                if (usuarios[i][1] .equals(t1.getText()) && usuarios[i][7] .equals(t2.getText())) {
+                    ad.ejecutar(usuarios[i][1].toString());
+                    dispose();
+                    var = true;
+                    break;
+
+                }
+
+            }
+            if (var == false) {
+                oportunidades--;
+            if (oportunidades == 0) {
+                JOptionPane.showMessageDialog(null, "Se acabaron las oportunidades");
+                System.exit(0);
+            } else {
+                JOptionPane.showMessageDialog(null, "Datos incorrectos, te quedan " + oportunidades + " oportunidades");
+            }
+            }
+
+        }
+
+    }
+
+    public void ejecutar() throws ClassNotFoundException {
+        inicio();
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException {
+        login l = new login();
+        l.ejecutar();
+    }
+
+}
